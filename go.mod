@@ -1,5 +1,6 @@
 module elearnping-go
 
+// +heroku goVersion go1.18.1
 go 1.18
 
 require go.uber.org/ratelimit v0.2.0
