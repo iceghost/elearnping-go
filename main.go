@@ -3,12 +3,13 @@ package main
 // import "fmt"
 import (
 	"elearnping-go/moodle"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -19,12 +20,24 @@ func main() {
 
 	service := moodle.BaseMoodleService{Token: os.Getenv("MY_TOKEN")}
 	r := gin.Default()
+
+	r.GET("/sites", func(c *gin.Context) {
+		sites, err := moodle.Exec[map[string][]moodle.Site](
+			&service,
+			moodle.GetSites{Classification: "inprogress"},
+		)
+		if err != nil {
+			c.AbortWithStatus(500)
+		}
+		c.JSON(200, sites)
+	})
+
 	r.GET("/sites/:siteid/updates", func(c *gin.Context) {
 		siteId, err := strconv.Atoi(c.Param("siteid"))
 		if err != nil {
 			c.AbortWithStatus(400)
 		}
-		sites, err := moodle.Exec[moodle.SiteUpdate](
+		updates, err := moodle.Exec[moodle.SiteUpdate](
 			&service,
 			moodle.GetUpdates{
 				SiteId: moodle.SiteId(siteId),
@@ -34,7 +47,8 @@ func main() {
 		if err != nil {
 			c.AbortWithStatus(500)
 		}
-		c.JSON(200, sites)
+		c.JSON(200, updates)
 	})
+	
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
