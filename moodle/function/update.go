@@ -21,11 +21,12 @@ func (req GetUpdatesFunction) Arguments() map[string]string {
 }
 
 func (req GetUpdatesFunction) Decode(token string, decoder *json.Decoder) moodle.SiteUpdate {
+	type Instance struct {
+		Id    moodle.ModuleId     `json:"id"`
+		Areas []moodle.UpdateArea `json:"updates"`
+	}
 	type Response struct {
-		Instances []struct {
-			Id    moodle.ModuleId     `json:"id"`
-			Areas []moodle.UpdateArea `json:"updates"`
-		} `json:"instances"`
+		Instances []Instance `json:"instances"`
 	}
 	var response Response
 	decoder.Decode(&response)
@@ -35,16 +36,29 @@ func (req GetUpdatesFunction) Decode(token string, decoder *json.Decoder) moodle
 		To:      time.Now(),
 		Updates: []moodle.ModuleUpdate{},
 	}
+	moduleUpdates := make(chan moodle.ModuleUpdate)
+	errs := make(chan error)
 	for _, instance := range response.Instances {
-		fn := GetModuleFunction{Id: instance.Id}
-		module, err := NewFunction[moodle.Module](token, fn).Call()
-		if err != nil {
+		go func(instance Instance) {
+			fn := GetModuleFunction{Id: instance.Id}
+			module, err := NewFunction[moodle.Module](token, fn).Call()
+			if err != nil {
+				errs <- err
+			} else {
+				moduleUpdates <- moodle.ModuleUpdate{
+					Module: module,
+					Areas:  instance.Areas,
+				}
+			}
+		}(instance)
+	}
+	for range response.Instances {
+		select {
+		case update := <-moduleUpdates:
+			siteUpdate.Updates = append(siteUpdate.Updates, update)
+		case err := <-errs:
 			panic(err)
 		}
-		siteUpdate.Updates = append(siteUpdate.Updates, moodle.ModuleUpdate{
-			module,
-			instance.Areas,
-		})
 	}
 	return siteUpdate
 }

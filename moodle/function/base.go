@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+
+	"go.uber.org/ratelimit"
 )
 
 type Function[Res any] interface {
@@ -41,7 +43,10 @@ func (fn BaseFunction[Res]) URL() *url.URL {
 	return &newEndpoint
 }
 
+var rl = ratelimit.New(15)
+
 func (fn BaseFunction[Res]) Fetch() (io.ReadCloser, error) {
+	rl.Take()
 	res, err := http.Get(fn.URL().String())
 	if err != nil {
 		return nil, err
