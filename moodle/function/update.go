@@ -41,7 +41,9 @@ func (req GetUpdatesFunction) Decode(token string, decoder *json.Decoder) moodle
 	for _, instance := range response.Instances {
 		go func(instance Instance) {
 			fn := GetModuleFunction{Id: instance.Id}
-			module, err := NewFunction[moodle.Module](token, fn).Call()
+			module, err := NewCachedGetModuleFunction(
+				NewFunction[moodle.Module](token, fn),
+			).Call()
 			if err != nil {
 				errs <- err
 			} else {

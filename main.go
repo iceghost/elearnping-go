@@ -1,6 +1,5 @@
 package main
 
-// import "fmt"
 import (
 	"elearnping-go/moodle"
 	moodlefn "elearnping-go/moodle/function"
@@ -9,11 +8,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func main() {
-	godotenv.Load()
 	token := os.Getenv("MY_TOKEN")
 	r := gin.Default()
 
