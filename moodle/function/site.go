@@ -1,38 +1,32 @@
-package moodle
+package function
 
 import (
+	"elearnping-go/moodle"
 	"encoding/json"
 )
 
-type SiteId uint
-
-type Site struct {
-	Id   SiteId `json:"id"`
-	Name string `json:"fullname"`
-}
-
-type GetSites struct {
+type GetSitesFunction struct {
 	Classification string
 }
 
-func (req GetSites) Function() string {
+func (req GetSitesFunction) Name() string {
 	return "core_course_get_enrolled_courses_by_timeline_classification"
 }
 
-func (req GetSites) Arguments() map[string]string {
+func (req GetSitesFunction) Arguments() map[string]string {
 	return map[string]string{"classification": req.Classification}
 }
 
-func (req GetSites) Decode(decoder *json.Decoder, _ MoodleService) map[string][]Site {
+func (req GetSitesFunction) Decode(_ string, decoder *json.Decoder) map[string][]moodle.Site {
 	type Response struct {
 		Sites []struct {
-			Site
+			moodle.Site
 			Category string `json:"coursecategory"`
 		} `json:"courses"`
 	}
 	var response Response
 	decoder.Decode(&response)
-	output := make(map[string][]Site)
+	output := make(map[string][]moodle.Site)
 	for _, catsite := range response.Sites {
 		output[catsite.Category] = append(output[catsite.Category], catsite.Site)
 	}

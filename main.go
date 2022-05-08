@@ -3,7 +3,7 @@ package main
 // import "fmt"
 import (
 	"elearnping-go/moodle"
-	"log"
+	moodlefn "elearnping-go/moodle/function"
 	"os"
 	"strconv"
 	"time"
@@ -13,19 +13,15 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	service := moodle.BaseMoodleService{Token: os.Getenv("MY_TOKEN")}
+	godotenv.Load()
+	token := os.Getenv("MY_TOKEN")
 	r := gin.Default()
 
 	r.GET("/sites", func(c *gin.Context) {
-		sites, err := moodle.Exec[map[string][]moodle.Site](
-			&service,
-			moodle.GetSites{Classification: "inprogress"},
-		)
+		fn := moodlefn.NewFunction[map[string][]moodle.Site](token, moodlefn.GetSitesFunction{
+			Classification: "inprogress",
+		})
+		sites, err := fn.Call()
 		if err != nil {
 			c.AbortWithStatus(500)
 		}
@@ -37,18 +33,18 @@ func main() {
 		if err != nil {
 			c.AbortWithStatus(400)
 		}
-		updates, err := moodle.Exec[moodle.SiteUpdate](
-			&service,
-			moodle.GetUpdates{
+		fn := moodlefn.NewFunction[moodle.SiteUpdate](token,
+			moodlefn.GetUpdatesFunction{
 				SiteId: moodle.SiteId(siteId),
 				Since:  time.Now().Add(-time.Hour * 24 * 30),
 			},
 		)
+		updates, err := fn.Call()
 		if err != nil {
 			c.AbortWithStatus(500)
 		}
 		c.JSON(200, updates)
 	})
-	
+
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
