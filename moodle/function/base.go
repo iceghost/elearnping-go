@@ -3,8 +3,10 @@ package function
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 
 	"go.uber.org/ratelimit"
 )
@@ -44,10 +46,13 @@ func (fn BaseFunction[Res]) URL() *url.URL {
 }
 
 var rl = ratelimit.New(15)
+var logger = log.New(os.Stdout, "[base fetch]", log.Ldate|log.Ltime)
 
 func (fn BaseFunction[Res]) Fetch() (io.ReadCloser, error) {
 	rl.Take()
-	res, err := http.Get(fn.URL().String())
+	url := fn.URL()
+	logger.Printf("Fetch %s %v", fn.iFn.Name(), fn.iFn.Arguments())
+	res, err := http.Get(url.String())
 	if err != nil {
 		return nil, err
 	}
