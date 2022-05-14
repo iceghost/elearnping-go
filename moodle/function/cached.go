@@ -59,7 +59,7 @@ func (fn CachedGetModuleFunction) Call() (moodle.Module, error) {
 	var buf bytes.Buffer
 	defer func() {
 		body.Close()
-		rdb.SetNX(ctx, key(fn.base.iFn), buf.String(), time.Hour)
+		rdb.SetNX(ctx, key(fn.base.iFn), buf.String(), 6*time.Hour)
 	}()
 	decoder := json.NewDecoder(io.TeeReader(body, &buf))
 	return fn.base.iFn.Decode(fn.base.token, decoder), nil

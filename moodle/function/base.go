@@ -45,7 +45,7 @@ func (fn BaseFunction[Res]) URL() *url.URL {
 	return &newEndpoint
 }
 
-var rl = ratelimit.New(15)
+var rl = ratelimit.New(3)
 var logger = log.New(os.Stdout, "[base fetch]", log.Ldate|log.Ltime)
 
 func (fn BaseFunction[Res]) Fetch() (io.ReadCloser, error) {
