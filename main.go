@@ -2,8 +2,10 @@ package main
 
 import (
 	"elearnping-go/moodle"
-	moodlefn "elearnping-go/moodle/function"
+	"elearnping-go/moodle/complexquery"
+	"elearnping-go/moodle/query"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -14,6 +16,11 @@ import (
 )
 
 func main() {
+	os.Setenv("TZ", "Asia/Ho_Chi_Minh")
+	serve()
+}
+
+func serve() {
 	r := gin.Default()
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"*"}
@@ -26,10 +33,10 @@ func main() {
 		if invalid {
 			return
 		}
-		fn := moodlefn.NewFunction[bool](token, moodlefn.VerifyTokenFunction{})
-		valid, err := fn.Call()
+		valid, err := query.Call(query.NewVerifyQuery(), token)
 		if err != nil {
-			c.AbortWithStatus(500)
+			c.AbortWithError(500, err)
+			return
 		}
 		c.JSON(200, valid)
 	})
@@ -39,42 +46,47 @@ func main() {
 		if invalid {
 			return
 		}
-		fn := moodlefn.NewFunction[map[string][]moodle.Site](token, moodlefn.GetSitesFunction{
-			Classification: "inprogress",
-		})
-		sites, err := fn.Call()
+		sites, err := complexquery.CallFullSites(token)
 		if err != nil {
-			c.AbortWithStatus(500)
+			c.AbortWithError(500, err)
+			return
 		}
 		c.JSON(200, sites)
 	})
 
-	r.GET("/sites/:siteid/updates", func(c *gin.Context) {
+	r.GET("/updates", func(c *gin.Context) {
 		token, invalid := getToken(c)
 		if invalid {
 			return
 		}
-		siteId, err := strconv.Atoi(c.Param("siteid"))
+		catsites, err := complexquery.CallFullSites(token)
 		if err != nil {
-			c.AbortWithStatus(400)
+			c.AbortWithError(500, err)
+			return
 		}
 		var from time.Time
 		if since, err := strconv.Atoi(c.Query("since")); err != nil {
-			from = time.Now().Add(-time.Hour)
+			from = time.Now()
 		} else {
 			from = time.UnixMilli(int64(since))
 		}
-		fn := moodlefn.NewFunction[moodle.SiteUpdate](token,
-			moodlefn.GetUpdatesFunction{
-				SiteId: moodle.SiteId(siteId),
-				Since:  from,
-			},
-		)
-		updates, err := fn.Call()
+		allUpdates := []moodle.SiteUpdate{}
+		for cat := range catsites {
+			for _, site := range catsites[cat] {
+				updates, err := complexquery.CallFullUpdates(token, site, from)
+				if err != nil {
+					c.AbortWithError(500, err)
+					return
+				}
+				if len(updates.Updates) > 0 {
+					allUpdates = append(allUpdates, updates)
+				}
+			}
+		}
 		if err != nil {
 			c.AbortWithStatus(500)
 		}
-		c.JSON(200, updates)
+		c.JSON(200, allUpdates)
 	})
 
 	r.Run() // listen and serve on 0.0.0.0:8080

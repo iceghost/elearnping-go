@@ -4,6 +4,7 @@ import "time"
 
 type ModuleId uint
 type SiteId uint
+type GroupId int
 
 type Module struct {
 	Id         ModuleId `json:"id"`
@@ -12,12 +13,13 @@ type Module struct {
 }
 
 type Site struct {
-	Id   SiteId `json:"id"`
-	Name string `json:"fullname"`
+	Id      SiteId  `json:"id"`
+	Name    string  `json:"fullname"`
+	GroupId GroupId `json:"groupid"`
 }
 
 type SiteUpdate struct {
-	SiteId  SiteId         `json:"siteId"`
+	Site    Site           `json:"site"`
 	From    time.Time      `json:"from"`
 	To      time.Time      `json:"to"`
 	Updates []ModuleUpdate `json:"updates"`
