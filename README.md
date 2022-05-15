@@ -21,5 +21,21 @@ $ go run .
 ```bash
 $ curl \
     --location --request GET 'localhost:8080/api/sites' \
-    --header 'Authorization: Bearer {{YOUR_MOODLE_TOKEN_HERE}}'
+    --header 'Authorization: Bearer {{YOUR_MOODLE_TOKEN_HERE}}' \
+    | python3 -m json.tool
 ```
+
+## Where to find your Moodle token?
+
+Login into e-learning site. Inside the menu on the arrow left of your avatar,
+click "Tùy chọn"
+
+![](images/step2.jpg)
+
+Click "Security keys".
+
+![](images/step3.jpg)
+
+Your token is the "Moodle mobile web service" one.
+
+![](images/step4.jpg)
