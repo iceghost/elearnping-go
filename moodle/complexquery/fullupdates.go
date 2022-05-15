@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// get updates, with module name information
 func CallFullUpdates(token string, site moodle.Site, since time.Time) (moodle.SiteUpdate, error) {
 	var zero moodle.SiteUpdate
 

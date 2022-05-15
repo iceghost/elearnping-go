@@ -28,7 +28,7 @@ func serve() {
 	config.AllowMethods = []string{"GET", "OPTIONS"}
 	r.Use(cors.New(config))
 
-	r.GET("/login", func(c *gin.Context) {
+	r.GET("/api/login", func(c *gin.Context) {
 		token, invalid := getToken(c)
 		if invalid {
 			return
@@ -41,7 +41,7 @@ func serve() {
 		c.JSON(200, valid)
 	})
 
-	r.GET("/sites", func(c *gin.Context) {
+	r.GET("/api/sites", func(c *gin.Context) {
 		token, invalid := getToken(c)
 		if invalid {
 			return
@@ -54,7 +54,7 @@ func serve() {
 		c.JSON(200, sites)
 	})
 
-	r.GET("/updates", func(c *gin.Context) {
+	r.GET("/api/updates", func(c *gin.Context) {
 		token, invalid := getToken(c)
 		if invalid {
 			return
@@ -85,6 +85,7 @@ func serve() {
 		}
 		if err != nil {
 			c.AbortWithStatus(500)
+			return
 		}
 		c.JSON(200, allUpdates)
 	})
@@ -92,6 +93,7 @@ func serve() {
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 
+// extract token from authorization header
 func getToken(c *gin.Context) (string, bool) {
 	auth := c.Request.Header.Get("Authorization")
 	if auth == "" {

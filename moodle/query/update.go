@@ -12,6 +12,10 @@ type updatesQuery struct {
 	Since time.Time
 }
 
+// get updates of a site, rounded down to nearest 6 hours (0h, 6h, 12h, 18h)
+//
+// also note that module names are empty, due to only one trip to server
+// if you want information about module name, use elearnping-go/moodle/complexquery
 func NewUpdatesQuery(site moodle.Site, since time.Time) CachableQuery[moodle.SiteUpdate] {
 	return updatesQuery{
 		site,

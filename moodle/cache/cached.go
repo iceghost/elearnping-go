@@ -13,6 +13,7 @@ import (
 
 var ctx = context.Background()
 
+// call queries and cache them
 func Call[Res any](q query.CachableQuery[Res], token string) (Res, error) {
 	defer lock.Unlock()
 	lock.Lock()

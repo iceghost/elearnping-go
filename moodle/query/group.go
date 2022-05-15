@@ -7,6 +7,7 @@ import (
 
 type groupsQuery struct{}
 
+// get group ids of a student's site
 func NewGroupsQuery() Query[map[moodle.SiteId]moodle.GroupId] {
 	return groupsQuery{}
 }

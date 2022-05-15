@@ -5,8 +5,9 @@ import (
 	"elearnping-go/moodle/query"
 )
 
-func CallFullSites(token string) (map[string][]moodle.Site, error) {
-	catsites, err := query.Call(query.NewSitesQuery("inprogress"), token)
+// get sites, with group id information
+func CallFullSites(token string) (map[moodle.Category][]moodle.Site, error) {
+	catsites, err := query.Call(query.NewSitesQuery(moodle.INPROGRESS), token)
 	if err != nil {
 		return nil, err
 	}

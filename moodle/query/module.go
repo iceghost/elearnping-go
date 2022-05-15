@@ -10,6 +10,7 @@ type moduleQuery struct {
 	Id moodle.ModuleId
 }
 
+// get information of a module in a site
 func NewModuleQuery(id moodle.ModuleId) CachableQuery[moodle.Module] {
 	return moduleQuery{id}
 }

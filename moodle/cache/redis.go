@@ -7,6 +7,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
+// cache database
 var rdb = redis.NewClient(&redis.Options{
 	Addr:     os.Getenv("REDIS_ADDR"),     // use default Addr
 	Password: os.Getenv("REDIS_PASSWORD"), // no password set

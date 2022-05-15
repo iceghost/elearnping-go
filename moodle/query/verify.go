@@ -6,6 +6,7 @@ import (
 
 type verifyToken struct{}
 
+// verify if token is valid by making a simple request and check response
 func NewVerifyQuery() Query[bool] {
 	return verifyToken{}
 }
