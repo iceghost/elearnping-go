@@ -26,6 +26,8 @@ func serve() {
 	config.AllowOrigins = []string{"*"}
 	config.AllowHeaders = []string{"Authorization"}
 	config.AllowMethods = []string{"GET", "OPTIONS"}
+	r.SetTrustedProxies(nil)
+
 	r.Use(cors.New(config))
 
 	r.GET("/api/login", func(c *gin.Context) {
